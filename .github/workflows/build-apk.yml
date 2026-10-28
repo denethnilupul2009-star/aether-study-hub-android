@@ -24,32 +24,15 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.9'
-
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
           packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
 
-      - name: Find and grant execute permission for gradlew
-        run: |
-          # Find gradlew in the repository if it's nested
-          GRADLEW_PATH=$(find . -name "gradlew" -type f)
-          if [ -z "$GRADLEW_PATH" ]; then
-            echo "gradlew not found!"
-            exit 1
-          fi
-          chmod +x $GRADLEW_PATH
-          echo "GRADLEW_DIR=$(dirname $GRADLEW_PATH)" >> $GITHUB_ENV
-
-      - name: Build APK
+      - name: Build APK with Gradle
         run: |
           yes | sdkmanager --licenses || true
-          cd $GRADLEW_DIR
-          ./gradlew assembleDebug
+          gradle assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
