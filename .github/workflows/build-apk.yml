@@ -29,9 +29,13 @@ jobs:
         with:
           packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
 
-      - name: Build APK with Gradle
+      - name: Find settings.gradle and Build APK
         run: |
           yes | sdkmanager --licenses || true
+          # settings.gradle ගොනුව ඇති ෆෝල්ඩරය ස්වයංක්‍රීයව සොයාගෙන එම ස්ථානයට යාම
+          PROJECT_DIR=$(find . -name "settings.gradle" -exec dirname {} \; | head -n 1)
+          echo "Project directory found at: $PROJECT_DIR"
+          cd "$PROJECT_DIR"
           gradle assembleDebug
 
       - name: Upload APK
