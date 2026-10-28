@@ -34,19 +34,27 @@ jobs:
         with:
           packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-        continue-on-error: true
+      - name: Find and grant execute permission for gradlew
+        run: |
+          # Find gradlew in the repository if it's nested
+          GRADLEW_PATH=$(find . -name "gradlew" -type f)
+          if [ -z "$GRADLEW_PATH" ]; then
+            echo "gradlew not found!"
+            exit 1
+          fi
+          chmod +x $GRADLEW_PATH
+          echo "GRADLEW_DIR=$(dirname $GRADLEW_PATH)" >> $GITHUB_ENV
 
       - name: Build APK
         run: |
           yes | sdkmanager --licenses || true
+          cd $GRADLEW_DIR
           ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Aether-Study-Hub-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: '**/build/outputs/apk/debug/app-debug.apk'
           if-no-files-found: error
           retention-days: 7
